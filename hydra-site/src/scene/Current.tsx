@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useMemo, useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { Html } from '@react-three/drei'
 import * as THREE from 'three'
@@ -6,6 +6,7 @@ import { LayerGroup, useActive } from './LayerGroup'
 import { Shafts } from './Water'
 import { PALETTE, SEA } from '../theme'
 import { useSea } from '../state/store'
+import { useSheet } from '../ui/layout'
 import { flowQueue, now, type FlowEdge } from '../state/fx'
 
 // −4,000 fathoms. Where every fee goes, drawn as a river of light between organs.
@@ -263,7 +264,7 @@ function Organ({ id }: { id: NodeId }) {
 // Real HTML labels, shown only once the visitor has arrived.
 function Labels() {
   const here = useSea((s) => s.layer === 'current' && s.diveTarget === null)
-  const phone = usePhone()
+  const phone = useSheet()
   if (!here) return null
   return (
     <>
@@ -279,17 +280,4 @@ function Labels() {
       })}
     </>
   )
-}
-
-// Phones get the short names: the long ones collide on a narrow screen.
-function usePhone() {
-  const query = '(max-width: 760px)'
-  const [phone, setPhone] = useState(() => window.matchMedia(query).matches)
-  useEffect(() => {
-    const m = window.matchMedia(query)
-    const on = () => setPhone(m.matches)
-    m.addEventListener('change', on)
-    return () => m.removeEventListener('change', on)
-  }, [])
-  return phone
 }

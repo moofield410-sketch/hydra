@@ -3,13 +3,14 @@ import { ACTIVITY_INFO, useSea, type Activity } from '../state/store'
 import { CONFIG, HAS_VAULT } from '../config'
 import { HOUR_COLOR } from '../palette'
 import { LAYERS, layerIndex, layer as layerOf, type LayerId } from '../state/layers'
-import { depthReadout, dive, diveStep, diveTo } from '../state/nav'
+import { depthReadout, dive, diveProgress, diveStep, diveTo, easeInOut } from '../state/nav'
 import { VaultPanel } from './VaultPanel'
 import { CoralPanel, CurrentPanel, MembranePanel, ReefPanel, TrenchPanel, WrecksPanel } from './Panels'
 import { GrottoPanel } from './GrottoPanel'
 import { SpawnPanel } from './SpawnPanel'
 import { setSound } from '../audio'
 import { Logo } from './Logo'
+import { useHudScale } from './layout'
 
 export const fmt = (n: number, d = 0) => n.toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d })
 /** Shown wherever a number does not exist yet (before launch, or before the first read). */
@@ -18,8 +19,9 @@ const moodName = (m: string) => (m === 'calm' ? 'Calm' : m === 'fear' ? 'Under a
 const fathoms = (d: number) => (d === Infinity ? '∞' : d === 0 ? '0' : `−${fmt(d)}`)
 
 export function Hud() {
+  const scale = useHudScale()
   return (
-    <div className="hud">
+    <div className="hud" style={scale}>
       <TopBar />
       <DepthGauge />
       <Panel />
@@ -68,7 +70,7 @@ function TopBar() {
       </a>
       <a className="xlink" href={`https://x.com/${CONFIG.xHandle}`} target="_blank" rel="noopener noreferrer" title={`@${CONFIG.xHandle} on X`}>
         <span aria-hidden>𝕏</span>
-        <span className="hide-sm">@{CONFIG.xHandle}</span>
+        <span className="hide-sm hide-md">@{CONFIG.xHandle}</span>
       </a>
       <button
         type="button"
@@ -82,7 +84,7 @@ function TopBar() {
           <i />
           <i />
         </span>
-        <span className="hide-sm">{sound ? 'Sound on' : 'Sound off'}</span>
+        <span className="hide-sm hide-md">{sound ? 'Sound on' : 'Sound off'}</span>
       </button>
       <div className={`mood mood-${mood}`} title={moodName(mood)}>
         <span className="mood-dot" />
@@ -107,30 +109,129 @@ function DepthNumber() {
   return <span ref={ref} />
 }
 
+const LAST = LAYERS.length - 1
+const clamp = (x: number, a: number, b: number) => Math.min(b, Math.max(a, x))
+
+/** Where the camera is on the scale, in layer steps, gliding between layers during a dive. */
+function scalePosition() {
+  const p = diveProgress()
+  const at = layerIndex(useSea.getState().layer)
+  if (p < 0 || dive.from === dive.to) return at
+  const a = layerIndex(dive.from)
+  return a + (layerIndex(dive.to) - a) * easeInOut(p)
+}
+
+// Dives to a layer now, or as soon as the dive in progress lands.
+function goTo(id: LayerId) {
+  if (!useSea.getState().diveTarget) return diveTo(id)
+  const off = useSea.subscribe((s) => {
+    if (s.diveTarget) return
+    off()
+    diveTo(id)
+  })
+}
+
+// The depth scale: tap a layer, or drag the pointer along it. While it moves it names the layer under it.
 function DepthGauge() {
   const here = useSea((s) => s.diveTarget ?? s.layer)
+  const diving = useSea((s) => s.diveTarget !== null)
+  const [aim, setAim] = useState<number | null>(null)
+  const track = useRef<HTMLDivElement>(null)
+  const thumb = useRef<HTMLSpanElement>(null)
+  // Where the finger is, in layer steps, while dragging; null otherwise.
+  const held = useRef<number | null>(null)
+
+  // The pointer eases toward the finger, or toward the camera's depth, every frame.
+  useEffect(() => {
+    let id = 0
+    let shown = scalePosition()
+    let last = performance.now()
+    const tick = (t: number) => {
+      const dt = Math.min(0.05, (t - last) / 1000)
+      last = t
+      const target = held.current ?? scalePosition()
+      shown += (target - shown) * (held.current !== null ? 1 : 1 - Math.exp(-14 * dt))
+      if (thumb.current) thumb.current.style.top = `${(shown / LAST) * 100}%`
+      id = requestAnimationFrame(tick)
+    }
+    id = requestAnimationFrame(tick)
+    return () => cancelAnimationFrame(id)
+  }, [])
+
+  const stepAt = (clientY: number) => {
+    const r = track.current!.getBoundingClientRect()
+    return clamp(((clientY - r.top) / r.height) * LAST, 0, LAST)
+  }
+  const move = (clientY: number) => {
+    const at = stepAt(clientY)
+    held.current = at
+    const i = Math.round(at)
+    setAim((prev) => {
+      // A tiny tick under the finger for each layer passed.
+      if (prev !== null && prev !== i) navigator.vibrate?.(6)
+      return i
+    })
+  }
+  const release = (go: boolean) => {
+    if (held.current === null) return
+    const i = Math.round(held.current)
+    held.current = null
+    setAim(null)
+    if (go) goTo(LAYERS[i].id)
+  }
+
+  const index = layerIndex(here)
+  const named = LAYERS[aim ?? index]
   return (
     <nav className="gauge" aria-label="Depth">
       <div className="gauge-depth">
         <DepthNumber />
         <small>fathoms</small>
       </div>
-      <ol>
-        {LAYERS.map((l) => {
-          const isHere = l.id === here
-          return (
-            <li key={l.id} className={isHere ? 'here' : ''}>
-              <button type="button" aria-current={isHere ? 'location' : undefined} onClick={() => diveTo(l.id)} title={l.name}>
-                <span className="tick" />
-                <span className="gauge-label">
-                  {l.name}
-                  <small>{l.id === 'trench' ? `${fathoms(l.depth)} → ∞` : fathoms(l.depth)}</small>
-                </span>
-              </button>
+      <div
+        ref={track}
+        className={`gauge-track ${aim !== null ? 'dragging' : ''} ${aim !== null || diving ? 'show' : ''}`}
+        role="slider"
+        tabIndex={0}
+        aria-orientation="vertical"
+        aria-valuemin={0}
+        aria-valuemax={LAST}
+        aria-valuenow={index}
+        aria-valuetext={layerOf(here).name}
+        onPointerDown={(e) => {
+          if (e.button !== 0) return
+          e.currentTarget.setPointerCapture(e.pointerId)
+          move(e.clientY)
+        }}
+        onPointerMove={(e) => held.current !== null && move(e.clientY)}
+        onPointerUp={() => release(true)}
+        onPointerCancel={() => release(false)}
+        onLostPointerCapture={() => release(false)}
+        onKeyDown={(e) => {
+          // Arrow keys already dive one layer anywhere on the page.
+          if (e.key === 'Home') goTo(LAYERS[0].id)
+          if (e.key === 'End') goTo(LAYERS[LAST].id)
+          if (e.key === 'Enter' || e.key === ' ') e.preventDefault()
+        }}
+      >
+        <ol>
+          {LAYERS.map((l, i) => (
+            <li key={l.id} className={`${l.id === here ? 'here' : ''} ${i === aim ? 'aim' : ''}`} style={{ top: `${(i / LAST) * 100}%` }}>
+              <span className="tick" />
+              <span className="gauge-label">
+                {l.name}
+                <small>{l.id === 'trench' ? `${fathoms(l.depth)} → ∞` : fathoms(l.depth)}</small>
+              </span>
             </li>
-          )
-        })}
-      </ol>
+          ))}
+        </ol>
+        <span ref={thumb} className="gauge-thumb">
+          <span className="gauge-bubble" aria-hidden>
+            {named.name}
+            <small>{fathoms(named.depth)}</small>
+          </span>
+        </span>
+      </div>
     </nav>
   )
 }

@@ -69,7 +69,8 @@ function useDiveInput() {
     let startY = 0
     const onTouchStart = (e: TouchEvent) => (startY = e.touches[0].clientY)
     const onTouchEnd = (e: TouchEvent) => {
-      if (insideScroller(e.target)) return
+      // The depth scale is dragged, not swiped.
+      if (insideScroller(e.target) || (e.target as HTMLElement | null)?.closest?.('.gauge')) return
       const dy = startY - e.changedTouches[0].clientY
       if (Math.abs(dy) > 60) step(dy > 0 ? 1 : -1)
     }

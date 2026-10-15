@@ -20,6 +20,7 @@ import { Grotto } from './Grotto'
 import { Trench } from './Trench'
 import { LayerGroup } from './LayerGroup'
 import { lowerQuality } from '../quality'
+import { isSheet } from '../ui/layout'
 import { MOOD_COLOR, PALETTE, RIG, SEA } from '../theme'
 import { useSea } from '../state/store'
 import { now, pulses } from '../state/fx'
@@ -140,7 +141,7 @@ function CameraRig() {
     const shake = reducedMotion ? 0 : pulses.shake * 0.12
     // Frame the open water: left of the panel on desktop, above the sheet on phones.
     const aspect = size.width / size.height
-    const phone = size.width <= 760
+    const phone = isSheet()
     const halfV = Math.tan(THREE.MathUtils.degToRad(42 / 2))
     const p = diveProgress()
     const diving = p >= 0

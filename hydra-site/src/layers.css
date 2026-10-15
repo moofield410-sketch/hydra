@@ -581,16 +581,15 @@ a.ghost {
   }
 }
 
-/* ---------- Phones: the gauge becomes a thin depth bar on the right edge ---------- */
-@media (max-width: 760px) {
+/* ---------- Bottom sheet: the scale stands on the right edge of the open water ---------- */
+@media (max-width: 760px), (max-width: 1180px) and (orientation: portrait) {
   .gauge {
     display: flex;
-    position: fixed;
-    right: 4px;
-    top: 84px;
-    height: 38dvh;
-    width: 14px;
-    padding: 0;
+    grid-row: 2;
+    grid-column: 1;
+    justify-self: end;
+    width: 44px;
+    padding: 8px 0;
     gap: 0;
     z-index: 3;
   }
@@ -598,22 +597,38 @@ a.ghost {
   .gauge-label {
     display: none;
   }
-  .gauge ol {
-    border-left: 0;
-    border-right: 1px solid var(--line);
-    margin: 0;
+  .gauge-track {
+    margin: 0 10px 0 0;
   }
-  .gauge button {
-    padding: 0;
-    justify-content: flex-end;
-    width: 14px;
+  .gauge-track::before {
+    left: auto;
+    right: 0;
+  }
+  .gauge li {
+    left: auto;
+    right: 0;
   }
   .gauge .tick {
-    width: 6px;
-    margin: 0 -1px 0 0;
+    width: 7px;
   }
-  .gauge li.here .tick {
-    width: 12px;
+  .gauge li.here .tick,
+  .gauge li.aim .tick {
+    width: 14px;
+  }
+  .gauge-thumb {
+    left: auto;
+    right: 0;
+    margin: -7px -6px 0 0;
+  }
+  .gauge-bubble {
+    display: flex;
+    left: auto;
+    right: 24px;
+    align-items: flex-end;
+    transform: translate(6px, -50%);
+  }
+  .gauge-track.show .gauge-bubble {
+    transform: translate(0, -50%);
   }
   .hero-title {
     font-size: 32px;
@@ -722,7 +737,9 @@ a.ghost {
 }
 .meter i.on {
   background: rgba(255, 255, 255, 0.55);
-}
+}
+
+
 .mint-row {
   display: flex;
   flex-wrap: wrap;
@@ -1031,7 +1048,7 @@ a.ghost {
     filter: brightness(2.5) blur(6px);
   }
 }
-@media (max-width: 760px) {
+@media (max-width: 760px), (max-width: 1180px) and (orientation: portrait) {
   .tabs button {
     padding: 5px 6px;
     font-size: 11px;
