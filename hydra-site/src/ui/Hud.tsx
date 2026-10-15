@@ -9,10 +9,12 @@ import { CoralPanel, CurrentPanel, MembranePanel, ReefPanel, TrenchPanel, Wrecks
 import { GrottoPanel } from './GrottoPanel'
 import { SpawnPanel } from './SpawnPanel'
 import { setSound } from '../audio'
+import { Logo } from './Logo'
 
 export const fmt = (n: number, d = 0) => n.toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d })
 /** Shown wherever a number does not exist yet (before launch, or before the first read). */
 export const NONE = '—'
+const moodName = (m: string) => (m === 'calm' ? 'Calm' : m === 'fear' ? 'Under attack' : 'Hype')
 const fathoms = (d: number) => (d === Infinity ? '∞' : d === 0 ? '0' : `−${fmt(d)}`)
 
 export function Hud() {
@@ -34,8 +36,8 @@ function TopBar() {
   return (
     <header className="topbar glass">
       <div className="brand">
-        <span className="brand-mark" aria-hidden>
-          ⟡
+        <span className="brand-mark">
+          <Logo />
         </span>
         <span className="brand-name">HYDRA</span>
       </div>
@@ -61,6 +63,9 @@ function TopBar() {
           <dd>{heads}</dd>
         </div>
       </dl>
+      <a className="xlink docs-link" href="./docs/">
+        Docs
+      </a>
       <a className="xlink" href={`https://x.com/${CONFIG.xHandle}`} target="_blank" rel="noopener noreferrer" title={`@${CONFIG.xHandle} on X`}>
         <span aria-hidden>𝕏</span>
         <span className="hide-sm">@{CONFIG.xHandle}</span>
@@ -79,9 +84,9 @@ function TopBar() {
         </span>
         <span className="hide-sm">{sound ? 'Sound on' : 'Sound off'}</span>
       </button>
-      <div className={`mood mood-${mood}`}>
+      <div className={`mood mood-${mood}`} title={moodName(mood)}>
         <span className="mood-dot" />
-        {mood === 'calm' ? 'Calm' : mood === 'fear' ? 'Under attack' : 'Hype'}
+        <span className="mood-text">{moodName(mood)}</span>
       </div>
     </header>
   )

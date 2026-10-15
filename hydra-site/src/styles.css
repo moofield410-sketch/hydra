@@ -98,10 +98,10 @@ button {
   gap: 10px;
 }
 .brand-mark {
+  display: inline-flex;
   color: var(--mood);
-  font-size: 22px;
-  text-shadow: 0 0 18px var(--mood);
-  transition: color 0.8s, text-shadow 0.8s;
+  filter: drop-shadow(0 0 8px var(--mood));
+  transition: color 0.8s;
 }
 .brand-name {
   font-family: var(--serif);
@@ -633,7 +633,12 @@ button {
     display: none;
   }
   .hide-sm,
+  .stats .hide-sm,
   .stats div:nth-child(2) {
+    display: none;
+  }
+  /* The mood is just its dot up here on phones; the panel below names it. */
+  .mood-text {
     display: none;
   }
   .stats dd {

@@ -40,6 +40,7 @@ Every value is optional. A part whose values are not set shows its pre-launch st
 | `VITE_RPC_URL` | Public RPC for reads. Without it there are no chain reads. |
 | `VITE_EXPLORER` | Explorer base URL, used for every ↗ receipt link (`/tx/…`, `/address/…`). |
 | `VITE_ORBIO_TOKEN` | ORBIO ERC-20 address. The vault balance is read from it. |
+| `VITE_HYDRA_TOKEN` | The $HYDRA token address, listed on the docs page (`/docs/`) |
 | `VITE_DEFENSE_VAULT` | DefenseVault address |
 | `VITE_SURVIVOR_NFT` | SurvivorNFT (ERC-1155) address, which turns on claims in the Grotto |
 | `VITE_TREASURY` | HydraTreasury address: shows HYDRA's Orbio fee stake (the next deposit) in the Spawning Pool |

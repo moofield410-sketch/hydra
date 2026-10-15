@@ -8,6 +8,7 @@ export const CONFIG = {
   rpcUrl: env.VITE_RPC_URL || '',
   explorer: (env.VITE_EXPLORER || '').replace(/\/$/, ''),
   orbioToken: env.VITE_ORBIO_TOKEN || '',
+  hydraToken: env.VITE_HYDRA_TOKEN || '', // shown in the docs' contract list
   defenseVault: env.VITE_DEFENSE_VAULT || '',
   survivorNft: env.VITE_SURVIVOR_NFT || '',
   spawnNft: env.VITE_SPAWN_NFT || '', // HydraSpawn (ERC-721)

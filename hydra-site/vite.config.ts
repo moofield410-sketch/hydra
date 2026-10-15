@@ -11,5 +11,7 @@ export default defineConfig({
   base: './',
   plugins: [react()],
   resolve: { alias: { '@spawn-art': art } },
+  // Two pages: the sea, and the docs at /docs/.
+  build: { rollupOptions: { input: { main: 'index.html', docs: 'docs/index.html' } } },
   server: { fs: { allow: ['.', '../nft'] } },
 })

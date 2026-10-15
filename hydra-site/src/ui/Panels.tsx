@@ -58,8 +58,14 @@ export function MembranePanel() {
         <button type="button" className="ghost" onClick={() => diveTo('spawn')}>
           Mint a Jellypion
         </button>
+        <a className="ghost" href="./docs/">
+          Read the docs
+        </a>
       </div>
       <p className="hint-line">Scroll, swipe or use the arrow keys. Every step goes one layer deeper. There is no bottom.</p>
+      <p className="fine-print">
+        An experiment, not an investment. <a href="./docs/#risks">Read the risks</a>.
+      </p>
     </>
   )
 }
