@@ -1,0 +1,12 @@
+# Only the website goes to GitHub. Plans, contracts, the agent and the X tools stay on this machine.
+/*
+!/.gitignore
+!/.github/
+!/hydra-site/
+!/nft/
+/nft/*
+!/nft/spawn-art.js
+
+node_modules/
+dist/
+*.tsbuildinfo
