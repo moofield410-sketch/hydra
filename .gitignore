@@ -2,6 +2,7 @@
 /*
 !/.gitignore
 !/.github/
+!/netlify.toml
 !/hydra-site/
 !/nft/
 /nft/*

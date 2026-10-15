@@ -1,0 +1,9 @@
+# Netlify builds the site from hydra-site/. The build also reads ../nft/spawn-art.js, which is in the repo.
+# $URL is the site's main Netlify address (or its custom domain): the X link card needs it.
+[build]
+  base = "hydra-site"
+  command = "VITE_SITE_URL=$URL npm run build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "22"

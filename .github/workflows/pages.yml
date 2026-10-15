@@ -1,10 +1,9 @@
-# Builds hydra-site and publishes it to GitHub Pages on every push to main.
+# Builds hydra-site and publishes it to GitHub Pages. The site is hosted on Netlify (netlify.toml), so this
+# only runs when started by hand from the Actions tab.
 # VITE_SITE_URL (for the X link card) is the Pages address, or the repo variable SITE_URL when one is set.
 name: Deploy site
 
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
 
 permissions:
