@@ -23,6 +23,8 @@
 * {
   box-sizing: border-box;
   margin: 0;
+  /* No grey or blue flash over whatever a finger touches. */
+  -webkit-tap-highlight-color: transparent;
 }
 
 html,
@@ -34,6 +36,9 @@ body,
   color: var(--pearl);
   font-family: var(--sans);
   -webkit-font-smoothing: antialiased;
+  /* A swipe down dives up a layer; it must never pull the page to refresh it. */
+  overscroll-behavior: none;
+  touch-action: manipulation;
 }
 
 button {
@@ -156,10 +161,17 @@ button {
   border-radius: 50%;
   background: var(--mood);
   box-shadow: 0 0 12px var(--mood);
-  animation: pulse 1.6s ease-in-out infinite;
+  animation: glow 3.2s ease-in-out infinite;
 }
 .mood-fear .mood-dot {
-  animation-duration: 0.5s;
+  animation-duration: 1.2s;
+}
+/* A slow breath, not a blink: the dot never fades out. */
+@keyframes glow {
+  50% {
+    box-shadow: 0 0 4px var(--mood);
+    transform: scale(0.85);
+  }
 }
 @keyframes pulse {
   50% {
@@ -328,7 +340,7 @@ button {
 .now-title .now-dot {
   width: 12px;
   height: 12px;
-  animation: pulse 1.4s ease-in-out infinite;
+  animation: glow 3s ease-in-out infinite;
 }
 
 .grid {
@@ -447,7 +459,7 @@ button {
   height: 7px;
   border-radius: 50%;
   background: var(--mood);
-  animation: pulse 1.2s infinite;
+  animation: glow 2.4s ease-in-out infinite;
 }
 .ticker-track {
   display: flex;

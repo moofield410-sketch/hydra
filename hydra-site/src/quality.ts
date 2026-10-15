@@ -12,6 +12,7 @@ export function detectQuality(): Quality {
     const gl = document.createElement('canvas').getContext('webgl')
     const ext = gl?.getExtension('WEBGL_debug_renderer_info')
     gpu = ext && gl ? String(gl.getParameter(ext.UNMASKED_RENDERER_WEBGL)).toLowerCase() : ''
+    release(gl)
   } catch {
     /* no GPU info: decide from cores alone */
   }
@@ -25,10 +26,17 @@ export function hasWebGL() {
   if (new URLSearchParams(location.search).has('flat')) return false
   try {
     const c = document.createElement('canvas')
-    return !!(c.getContext('webgl2') || c.getContext('webgl'))
+    const gl = c.getContext('webgl2') || c.getContext('webgl')
+    release(gl)
+    return !!gl
   } catch {
     return false
   }
+}
+
+// Phones allow only a few live WebGL contexts; a probe left open can cost the sea its own.
+function release(gl: WebGLRenderingContext | WebGL2RenderingContext | null | undefined) {
+  gl?.getExtension('WEBGL_lose_context')?.loseContext()
 }
 
 export const lowerQuality = (q: Quality): Quality => (q === 'high' ? 'mid' : 'low')

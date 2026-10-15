@@ -32,6 +32,9 @@ const reducedMotion = typeof window !== 'undefined' && window.matchMedia('(prefe
 export function Sea() {
   const quality = useSea((s) => s.quality)
   const start = useMemo(() => layerOf(useSea.getState().layer).y + 1.6, [])
+  // The glow is decided once: mounting or unmounting it later flashes the whole screen.
+  const glow = useMemo(() => useSea.getState().quality !== 'low', [])
+  const born = useMemo(() => performance.now(), [])
   return (
     <Canvas
       dpr={quality === 'high' ? [1, 2] : quality === 'mid' ? [1, 1.5] : 1}
@@ -42,8 +45,14 @@ export function Sea() {
         scene.fog = new THREE.FogExp2(PALETTE.abyss, 0.045)
       }}
     >
-      {/* Step down a tier if the device cannot keep up. */}
-      <PerformanceMonitor onDecline={() => useSea.getState().set({ quality: lowerQuality(useSea.getState().quality) })} flipflops={2} />
+      {/* Step down a tier if the device cannot keep up, but not while the first frames compile shaders. */}
+      <PerformanceMonitor
+        onDecline={() => {
+          if (performance.now() - born < 8000) return
+          useSea.getState().set({ quality: lowerQuality(useSea.getState().quality) })
+        }}
+        flipflops={2}
+      />
       <SeaDriver />
       <CameraRig />
       <ambientLight intensity={0.35} />
@@ -63,7 +72,7 @@ export function Sea() {
       <Trench />
       <Particles />
       <Sonar />
-      {quality !== 'low' && <Post full={quality === 'high'} />}
+      {glow && <Post full={quality === 'high'} />}
     </Canvas>
   )
 }
