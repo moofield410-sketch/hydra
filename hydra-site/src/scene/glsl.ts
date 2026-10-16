@@ -1,5 +1,9 @@
+import { LITE } from '../quality'
+
 // Ashima simplex noise (MIT), shared by every shader in the sea.
+// Phones and tablets take two octaves instead of four: half the noise, nearly the same look.
 export const NOISE = /* glsl */ `
+#define FBM_OCTAVES ${LITE ? 2 : 4}
 vec3 mod289(vec3 x){return x-floor(x*(1.0/289.0))*289.0;}
 vec4 mod289(vec4 x){return x-floor(x*(1.0/289.0))*289.0;}
 vec4 permute(vec4 x){return mod289(((x*34.0)+1.0)*x);}
@@ -45,7 +49,7 @@ float snoise(vec3 v){
 }
 float fbm(vec3 p){
   float f=0.0; float a=0.5;
-  for(int i=0;i<4;i++){ f+=a*snoise(p); p*=2.03; a*=0.5; }
+  for(int i=0;i<FBM_OCTAVES;i++){ f+=a*snoise(p); p*=2.03; a*=0.5; }
   return f;
 }
 `

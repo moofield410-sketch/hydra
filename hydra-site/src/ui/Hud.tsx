@@ -99,8 +99,11 @@ function DepthNumber() {
   const ref = useRef<HTMLSpanElement>(null)
   useEffect(() => {
     let id = 0
+    let shown = ''
     const tick = () => {
-      if (ref.current) ref.current.textContent = fathoms(Math.round(depthReadout()))
+      // Touch the page only when the number changes: every write costs the phone a layout.
+      const text = fathoms(Math.round(depthReadout()))
+      if (ref.current && text !== shown) ref.current.textContent = shown = text
       id = requestAnimationFrame(tick)
     }
     tick()
@@ -145,13 +148,15 @@ function DepthGauge() {
   useEffect(() => {
     let id = 0
     let shown = scalePosition()
+    let drawn = -1
     let last = performance.now()
     const tick = (t: number) => {
       const dt = Math.min(0.05, (t - last) / 1000)
       last = t
       const target = held.current ?? scalePosition()
       shown += (target - shown) * (held.current !== null ? 1 : 1 - Math.exp(-14 * dt))
-      if (thumb.current) thumb.current.style.top = `${(shown / LAST) * 100}%`
+      if (Math.abs(shown - target) < 0.001) shown = target
+      if (thumb.current && shown !== drawn) thumb.current.style.top = `${((drawn = shown) / LAST) * 100}%`
       id = requestAnimationFrame(tick)
     }
     id = requestAnimationFrame(tick)

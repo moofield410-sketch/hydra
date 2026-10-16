@@ -1,12 +1,17 @@
 export type Quality = 'high' | 'mid' | 'low'
 
+/** A phone or tablet: a touch screen whose short side is tablet-sized or less, whatever width the page claims. */
+export const LITE =
+  typeof window !== 'undefined' && navigator.maxTouchPoints > 0 && Math.min(screen.width, screen.height) <= 1100
+
 // Picks a quality tier from the device. `?q=high|mid|low` overrides it for testing.
 export function detectQuality(): Quality {
   if (typeof window === 'undefined') return 'mid'
   const forced = new URLSearchParams(location.search).get('q')
   if (forced === 'high' || forced === 'mid' || forced === 'low') return forced
   const cores = navigator.hardwareConcurrency ?? 4
-  const phone = window.innerWidth < 760
+  // A phone in desktop-site mode reports a desktop width, so ask the screen instead.
+  const phone = window.innerWidth < 760 || (LITE && Math.min(screen.width, screen.height) <= 600)
   let gpu = ''
   try {
     const gl = document.createElement('canvas').getContext('webgl')
@@ -17,7 +22,7 @@ export function detectQuality(): Quality {
     /* no GPU info: decide from cores alone */
   }
   if (/swiftshader|llvmpipe|software|basic render/.test(gpu)) return 'low'
-  if (phone || cores <= 4 || /intel|mali|adreno [1-5]|powervr/.test(gpu)) return 'mid'
+  if (phone || LITE || cores <= 4 || /intel|mali|adreno [1-5]|powervr/.test(gpu)) return 'mid'
   return 'high'
 }
 

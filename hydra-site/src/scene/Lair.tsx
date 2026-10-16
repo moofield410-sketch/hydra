@@ -19,7 +19,7 @@ import { Wrecks } from './Wrecks'
 import { Grotto } from './Grotto'
 import { Trench } from './Trench'
 import { LayerGroup } from './LayerGroup'
-import { lowerQuality } from '../quality'
+import { LITE, lowerQuality } from '../quality'
 import { isSheet } from '../ui/layout'
 import { MOOD_COLOR, PALETTE, RIG, SEA } from '../theme'
 import { useSea } from '../state/store'
@@ -38,7 +38,8 @@ export function Sea() {
   const born = useMemo(() => performance.now(), [])
   return (
     <Canvas
-      dpr={quality === 'high' ? [1, 2] : quality === 'mid' ? [1, 1.5] : 1}
+      // Phones fill few pixels per frame: their screens are sharp, their GPUs are not.
+      dpr={quality === 'high' ? [1, 2] : quality === 'mid' ? [1, LITE ? 1.25 : 1.5] : 1}
       camera={{ position: [0, start, 9.2], fov: 42, near: 0.1, far: 200 }}
       gl={{ antialias: false, powerPreference: 'high-performance', alpha: false }}
       onCreated={({ gl, scene }) => {
@@ -59,7 +60,7 @@ export function Sea() {
       <ambientLight intensity={0.35} />
       <Water />
       <FollowCamera>
-        <RisingLight count={quality === 'high' ? 1600 : quality === 'mid' ? 900 : 400} />
+        <RisingLight count={quality === 'high' ? 1600 : quality === 'mid' ? (LITE ? 600 : 900) : 400} />
       </FollowCamera>
       <Membrane />
       <Reef />
