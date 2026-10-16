@@ -6,7 +6,7 @@ import { CONFIG } from '../config'
 import { chain, reader } from './client'
 
 export const SPAWN_ABI = [
-  { type: 'function', name: 'mint', stateMutability: 'payable', inputs: [{ name: 'qty', type: 'uint256' }], outputs: [] },
+  { type: 'function', name: 'mint', stateMutability: 'nonpayable', inputs: [{ name: 'qty', type: 'uint256' }], outputs: [] },
   { type: 'function', name: 'hatch', stateMutability: 'nonpayable', inputs: [{ name: 'max', type: 'uint256' }], outputs: [{ type: 'uint256' }] },
   { type: 'function', name: 'stake', stateMutability: 'nonpayable', inputs: [{ name: 'ids', type: 'uint256[]' }], outputs: [] },
   { type: 'function', name: 'unstake', stateMutability: 'nonpayable', inputs: [{ name: 'ids', type: 'uint256[]' }], outputs: [] },
@@ -15,14 +15,13 @@ export const SPAWN_ABI = [
   { type: 'function', name: 'MINT_START', stateMutability: 'view', inputs: [], outputs: [{ type: 'uint256' }] },
   { type: 'function', name: 'STAKE_START', stateMutability: 'view', inputs: [], outputs: [{ type: 'uint256' }] },
   { type: 'function', name: 'MINT_END', stateMutability: 'view', inputs: [], outputs: [{ type: 'uint256' }] },
-  { type: 'function', name: 'PAYOUT', stateMutability: 'view', inputs: [], outputs: [{ type: 'address' }] },
   { type: 'function', name: 'totalClaimed', stateMutability: 'view', inputs: [], outputs: [{ type: 'uint256' }] },
   {
     type: 'function',
     name: 'stats',
     stateMutability: 'view',
     inputs: [],
-    outputs: ['minted', 'hatched', 'pm', 'staked', 'points', 'rate', 'endsAt', 'pool', 'paid', 'ethHeld'].map((name) => ({ name, type: 'uint256' })),
+    outputs: ['minted', 'hatched', 'pm', 'staked', 'points', 'rate', 'endsAt', 'pool', 'paid'].map((name) => ({ name, type: 'uint256' })),
   },
   {
     type: 'function',
@@ -79,14 +78,13 @@ export type ChainHatch = { id: number; seed: string; tier: number; one: number |
 
 /** Values that never change after deploy. */
 export async function readFixed() {
-  const [supply, start, stakeStart, end, payout] = await Promise.all([
+  const [supply, start, stakeStart, end] = await Promise.all([
     read<bigint>('MAX_SUPPLY'),
     read<bigint>('MINT_START'),
     read<bigint>('STAKE_START'),
     read<bigint>('MINT_END'),
-    read<Address>('PAYOUT'),
   ])
-  return { supply: Number(supply), mintStart: Number(start) * 1000, stakeStart: Number(stakeStart) * 1000, mintEnd: Number(end) * 1000, payout }
+  return { supply: Number(supply), mintStart: Number(start) * 1000, stakeStart: Number(stakeStart) * 1000, mintEnd: Number(end) * 1000 }
 }
 
 export async function readStats() {
@@ -177,7 +175,7 @@ export async function readLastDeposit(blocks = 200_000n) {
 type Eip1193 = { request: (a: { method: string; params?: unknown[] }) => Promise<unknown> }
 
 /** Sends one HydraSpawn transaction from the visitor's wallet and waits for it. Returns the tx hash. */
-export async function send(account: Address, functionName: 'mint' | 'hatch' | 'stake' | 'unstake' | 'claim', args: unknown[] = [], value?: bigint) {
+export async function send(account: Address, functionName: 'mint' | 'hatch' | 'stake' | 'unstake' | 'claim', args: unknown[] = []) {
   const eth = (window as unknown as { ethereum?: Eip1193 }).ethereum
   if (!eth) throw new Error('No wallet found.')
   const hex = `0x${CONFIG.chainId.toString(16)}`
@@ -190,7 +188,7 @@ export async function send(account: Address, functionName: 'mint' | 'hatch' | 's
     })
   }
   const wallet = createWalletClient({ account, chain, transport: custom(eth) })
-  const hash = await wallet.writeContract({ address: nft(), abi: SPAWN_ABI, functionName, args: args as never, value } as never)
+  const hash = await wallet.writeContract({ address: nft(), abi: SPAWN_ABI, functionName, args: args as never } as never)
   const receipt = await reader().waitForTransactionReceipt({ hash })
   if (receipt.status !== 'success') throw new Error('The transaction failed on-chain.')
   return hash

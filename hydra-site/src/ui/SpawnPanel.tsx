@@ -4,13 +4,11 @@ import { ONES, TIERS } from '@spawn-art'
 import { useSea } from '../state/store'
 import {
   MAX_PER_WALLET,
-  PRICE_ETH,
   SPAWN_LIVE,
   claimRewards,
   dailyRate,
   earnedNow,
   hatchNow,
-  mintEth,
   mintSpawn,
   mintedByWallet,
   myPoints,
@@ -160,12 +158,12 @@ function MintTab({ onMine, onOpen }: { onMine: () => void; onOpen: (x: Spawn) =>
         />
       </div>
 
-      {!wallet && <Connect line="Mint up to 5 per wallet at 0.001 ETH each." />}
+      {!wallet && <Connect line="Mint up to 5 per wallet for free. You only pay gas." />}
       {wallet && (
         <div className="wallet">
           <WalletHead wallet={wallet} />
           {phase !== 'open' ? (
-            <p className="empty">{phase === 'soldout' ? 'Sold out. Every Jellypion is fully revealed.' : phase === 'soon' ? 'The mint has not opened yet. Mint up to 5 at 0.001 ETH each when it does.' : 'The mint is closed.'}</p>
+            <p className="empty">{phase === 'soldout' ? 'Sold out. Every Jellypion is fully revealed.' : phase === 'soon' ? 'The mint has not opened yet. Mint up to 5 for free when it does.' : 'The mint is closed.'}</p>
           ) : room === 0 ? (
             <p className="empty">
               This wallet has minted its {MAX_PER_WALLET}.{' '}
@@ -185,7 +183,7 @@ function MintTab({ onMine, onOpen }: { onMine: () => void; onOpen: (x: Spawn) =>
                 </button>
               </div>
               <button type="button" className="cta" onClick={mint} disabled={!!s.pending}>
-                {s.pending === 'mint' ? 'Confirming…' : `Mint ${q} · ${fmt(q * PRICE_ETH, 3)} ETH`}
+                {s.pending === 'mint' ? 'Confirming…' : `Mint ${q} · Free`}
               </button>
             </div>
           )}
@@ -229,8 +227,8 @@ function MintTab({ onMine, onOpen }: { onMine: () => void; onOpen: (x: Spawn) =>
         </ul>
       </div>
       <p className="hint-line">
-        The seed comes from the next block's hash, so nobody, the minter included, can see or choose a Jellypion before it hatches. Mint ETH goes
-        to the dev wallet <Src address={s.payout || undefined} /> and never pays rewards.
+        The seed comes from the next block's hash, so nobody, the minter included, can see or choose a Jellypion before it hatches. The mint is free:
+        the contract takes no ETH, only gas.
       </p>
     </>
   )
@@ -396,12 +394,6 @@ function RewardsTab() {
             </dt>
             <dd className="mono">{s.lastDeposit ? `${fmt(s.lastDeposit.amount)} ORBIO` : 'none yet'}</dd>
           </div>
-          <div>
-            <dt>
-              Dev wallet{s.payout ? ` ${short(s.payout)}` : ''} <Src address={s.payout || undefined} />
-            </dt>
-            <dd className="mono">{fmt(mintEth(s), 3)} ETH from the mint</dd>
-          </div>
         </dl>
       </div>
       <ol className="steps">
@@ -419,7 +411,7 @@ function RewardsTab() {
         </li>
       </ol>
       <p className="hint-line">
-        A live rate: it moves with trading volume and with how many Jellypions are staked, so it is never a promise. Mint ETH never funds this pool.
+        A live rate: it moves with trading volume and with how many Jellypions are staked, so it is never a promise. Only trading fees fund this pool.
         Contract <Src address={CONFIG.spawnNft || undefined} />
       </p>
     </>

@@ -72,7 +72,7 @@ function claim(uint256 attackId, bytes32[] proof);             // free, user pay
 function balanceOf(address account, uint256 id) view returns (uint256);
 
 // HydraSpawn (ERC-721, contracts/src/HydraSpawn.sol)
-function mint(uint256 qty) payable;                             // 0.001 ETH each, max 5 per wallet
+function mint(uint256 qty);                                     // free (gas only), max 5 per wallet
 function hatch(uint256 max) returns (uint256);                  // oldest eggs first; the keeper calls it every block
 function stake(uint256[] ids);
 function unstake(uint256[] ids);
@@ -86,7 +86,7 @@ function projectedDaily(address a) view returns (uint256);
 function projectedDailyFor(uint8 tier) view returns (uint256);
 function totalPaid() view returns (uint256);
 function tokenURI(uint256 id) view returns (string);            // fully on-chain SVG + attributes
-function stats() view returns (uint256 minted, uint256 hatched, uint256 pm, uint256 staked, uint256 points, uint256 rate, uint256 endsAt, uint256 pool, uint256 paid, uint256 ethHeld);
+function stats() view returns (uint256 minted, uint256 hatched, uint256 pm, uint256 staked, uint256 points, uint256 rate, uint256 endsAt, uint256 pool, uint256 paid);
 function account(address a) view returns (uint256 minted, uint256 points, uint256 earnedNow, uint256 daily, uint256 balance);
 function projectedDailyAll() view returns (uint256[5]);
 function tokensOf(address owner, uint256 from, uint256 to) view returns (uint256[]);

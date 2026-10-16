@@ -115,7 +115,7 @@ function Hero() {
         <Fact value="6 h" label="minimum between buybacks" />
         <Fact value="0" label="ways to withdraw the fund" />
         <Fact value="3,333" label="Jellypions, fully on-chain" />
-        <Fact value="0.001 ETH" label="mint price, 5 per wallet" />
+        <Fact value="Free" label="mint, 5 per wallet, gas only" />
       </div>
     </section>
   )
@@ -401,8 +401,8 @@ function Content() {
         <p>Outside the fees:</p>
         <ul>
           <li>
-            <b>Mint ETH</b> from Jellypions goes to the dev wallet, which is fixed in the contract forever. It is <b>never</b> used for
-            rewards, so new buyers never pay old ones.
+            <b>The Jellypions mint is free.</b> The contract takes no ETH, so there is no mint money at all, and rewards can only ever
+            come from trading fees: new holders never pay old ones.
           </li>
           <li>
             <b>The Defense Vault</b> holds the creator's seed and anything anyone deposits (see <a href="#vault">The Defense Vault</a>).
@@ -417,7 +417,7 @@ function Content() {
         </p>
         <ul>
           <li>
-            <b>Mint:</b> 0.001 ETH each, at most 5 per wallet.
+            <b>Mint:</b> free, at most 5 per wallet. You pay only the network gas; the contract refuses any ETH sent with a mint.
           </li>
           <li>
             <b>Fair instant hatch:</b> each egg's traits come from the hash of the block <i>after</i> your mint, which nobody can know when you
@@ -520,7 +520,7 @@ function Content() {
             <tr>
               <td>Jellypions</td>
               <td>The admin can replace the art renderer until it is frozen, and never again after that.</td>
-              <td>Change the price, supply, times or payout wallet, or move a staked Jellypion</td>
+              <td>Charge for the mint, or change the supply or times, or move a staked Jellypion</td>
             </tr>
             <tr>
               <td>SurvivorNFT</td>
@@ -649,7 +649,7 @@ const FAQ: [string, string][] = [
     'Will a wave of FUD posts trigger a buyback?',
     'Not on its own. The price must also be down 10% or more over 24 hours, and posts from new accounts, tiny accounts or copy-paste campaigns are ignored.',
   ],
-  ['Does the mint money pay the stakers?', 'No. Mint ETH goes to the dev wallet. Staking rewards come only from $HYDRA’s trading fees.'],
+  ['Does the mint cost anything?', 'No. The mint is free; you pay only gas. Staking rewards come only from $HYDRA’s trading fees.'],
   ['Is staking locked?', 'No. Your Jellypion stays in your wallet, and you can unstake at any time without a penalty.'],
   [
     'Which wallet do I need?',

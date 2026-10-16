@@ -8,7 +8,6 @@ import { CONFIG, HAS_SPAWN } from '../config'
 import { useSea } from './store'
 
 export const SUPPLY = 3333
-export const PRICE_ETH = 0.001
 export const MAX_PER_WALLET = 5
 /** True once the HydraSpawn contract is configured; until then the mint has not opened. */
 export const SPAWN_LIVE = HAS_SPAWN
@@ -20,7 +19,6 @@ export type Hatch = { id: number; seed: string; tier: number; one: number | null
 
 type State = {
   supply: number
-  payout: string // the dev wallet every mint's ETH goes to (PAYOUT in the contract, fixed forever)
   minted: number
   mintedByMe: number | null // what the contract counts for this wallet
   poolExtra: number // live: ORBIO in the pool beyond the current stream (carry)
@@ -53,7 +51,6 @@ const points = (tier: number) => TIERS[tier][1]
 const START = CONFIG.mintStart || Infinity
 export const useSpawn = create<State>((set) => ({
   supply: SUPPLY,
-  payout: '',
   minted: 0,
   mintedByMe: null,
   poolExtra: 0,
@@ -101,8 +98,6 @@ export const projectedDaily = (s: S, t = Date.now()) => (totalPoints(s) ? (daily
 const streamedIn = (s: S, t: number) => s.streamAmount * Math.min(1, Math.max(0, (t - s.streamStart) / DAY))
 export const totalPaid = (s: S, t = Date.now()) => s.paidBefore + streamedIn(s, t)
 export const poolBalance = (s: S, t = Date.now()) => s.streamAmount - streamedIn(s, t) + s.poolExtra
-/** ETH the dev wallet has received from the mint. */
-export const mintEth = (s: S) => s.minted * PRICE_ETH
 export function earnedNow(s: S, t = Date.now()) {
   const tp = totalPoints(s)
   const mp = myPoints(s)
@@ -196,12 +191,12 @@ async function refresh() {
   }
 }
 
-async function liveSend(fn: 'mint' | 'hatch' | 'stake' | 'unstake' | 'claim', args: unknown[], pending: State['pending'], value?: bigint) {
+async function liveSend(fn: 'mint' | 'hatch' | 'stake' | 'unstake' | 'claim', args: unknown[], pending: State['pending']) {
   const w = liveWallet()
   const c = await chain()
   get().set({ pending })
   try {
-    await c.send(w, fn, args, value)
+    await c.send(w, fn, args)
   } finally {
     get().set({ pending: null })
   }
@@ -212,7 +207,7 @@ async function liveMint(qty: number) {
   const s = get()
   if (mintedByWallet(s) + qty > MAX_PER_WALLET) throw new Error(`At most ${MAX_PER_WALLET} per wallet.`)
   const had = new Set(s.mine.map((x) => x.id))
-  await liveSend('mint', [BigInt(qty)], 'mint', BigInt(qty) * 10n ** 15n) // 0.001 ETH each
+  await liveSend('mint', [BigInt(qty)], 'mint') // free: only gas
   useSea.getState().float(`${qty} egg${qty > 1 ? 's' : ''} laid`, 'orchid')
   // The agent's keeper hatches within a second or two; watch for it (hatchNow() is the fallback).
   for (let k = 0; k < 12 && get().mine.some((x) => x.hatching); k++) {
