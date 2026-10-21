@@ -7,3 +7,10 @@
 
 [build.environment]
   NODE_VERSION = "22"
+
+# The token's on-chain website and logo point at the netlify.app address forever; send those visitors to the real domain.
+[[redirects]]
+  from = "https://hydraxagent.netlify.app/*"
+  to = "https://agenthydra.xyz/:splat"
+  status = 301
+  force = true
