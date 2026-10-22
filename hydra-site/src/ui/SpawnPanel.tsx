@@ -275,16 +275,24 @@ function MineTab({ onMint, onOpen }: { onMint: () => void; onOpen: (x: Spawn) =>
         <WalletHead wallet={wallet} />
         <p className="empty">
           No Jellypions in this wallet yet.{' '}
-          <button type="button" className="link" onClick={onMint}>
-            Mint one
-          </button>
+          {s.minted >= s.supply && CONFIG.opensea ? (
+            <a className="link" href={CONFIG.opensea} target="_blank" rel="noopener noreferrer">
+              Find one on OpenSea
+            </a>
+          ) : (
+            <button type="button" className="link" onClick={onMint}>
+              Mint one
+            </button>
+          )}
         </p>
       </div>
     )
 
   const p = progressOf(s, t)
   const stakingOpen = t >= s.stakeStart
-  const chosen = s.mine.filter((x) => sel.includes(x.id) && !x.hatching)
+  // Nothing picked means every one: the buttons stake or unstake the whole wallet.
+  const all = !sel.length
+  const chosen = s.mine.filter((x) => (all || sel.includes(x.id)) && !x.hatching)
   const toStake = chosen.filter((x) => !x.staked).map((x) => x.id)
   const toUnstake = chosen.filter((x) => x.staked).map((x) => x.id)
   const earned = earnedNow(s, t)
@@ -332,16 +340,20 @@ function MineTab({ onMint, onOpen }: { onMint: () => void; onOpen: (x: Spawn) =>
       </ul>
       <div className="tank-actions">
         <button type="button" className="cta small" disabled={!stakingOpen || !toStake.length || !!s.pending} onClick={() => act(() => setStaked(toStake, true))}>
-          {s.pending === 'stake' ? 'Staking…' : `Stake ${toStake.length || ''}`}
+          {s.pending === 'stake' ? 'Staking…' : `Stake ${all && toStake.length ? 'all ' : ''}${toStake.length || ''}`}
         </button>
         <button type="button" className="ghost" disabled={!toUnstake.length || !!s.pending} onClick={() => act(() => setStaked(toUnstake, false))}>
-          {s.pending === 'unstake' ? 'Unstaking…' : `Unstake ${toUnstake.length || ''}`}
+          {s.pending === 'unstake' ? 'Unstaking…' : `Unstake ${all && toUnstake.length ? 'all ' : ''}${toUnstake.length || ''}`}
         </button>
         <button type="button" className="ghost small" onClick={() => setSel(sel.length ? [] : s.mine.filter((x) => !x.hatching).map((x) => x.id))}>
           {sel.length ? 'Clear' : 'Select all'}
         </button>
       </div>
       {!stakingOpen && <p className="empty">Staking opens {inTime(s.stakeStart - t)}.</p>}
+      <p className="hint-line">
+        Tap Jellypions to pick some, or leave none picked to stake or unstake them all. Unstaking works any time, costs only gas, and you keep
+        everything you earned. A staked Jellypion cannot be sold until it is unstaked.
+      </p>
       {error && <p className="error">{error}</p>}
       <p className="hint-line">
         Staked Jellypions stay in your wallet and show a ring; they just can't be sold or moved until you unstake. No lock, no penalty. The next
