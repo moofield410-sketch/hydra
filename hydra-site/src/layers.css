@@ -652,6 +652,11 @@ a.ghost {
 }
 
 /* ---------- Spawning Pool ---------- */
+/* The OpenSea link is an <a> styled as a button. */
+a.cta,
+a.ghost {
+  text-decoration: none;
+}
 .cta-row {
   display: flex;
   flex-wrap: wrap;

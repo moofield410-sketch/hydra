@@ -12,6 +12,7 @@ export const CONFIG = {
   defenseVault: env.VITE_DEFENSE_VAULT || '',
   survivorNft: env.VITE_SURVIVOR_NFT || '',
   spawnNft: env.VITE_SPAWN_NFT || '', // HydraSpawn (ERC-721)
+  opensea: env.VITE_OPENSEA_URL || '', // the Jellypions collection on OpenSea
   treasury: env.VITE_TREASURY || '', // HydraTreasury: owns HYDRA's Orbio fee stake, pays it only to the Jellypions pool
   // When the mint opens (unix seconds, the MINT_START given to the deploy). Before the contract is set it drives the countdown.
   mintStart: Number(env.VITE_MINT_START || 0) * 1000,

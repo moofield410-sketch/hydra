@@ -157,13 +157,20 @@ function MintTab({ onMine, onOpen }: { onMine: () => void; onOpen: (x: Spawn) =>
           hint="opens 12 hours after the mint starts"
         />
       </div>
+      {CONFIG.opensea && (
+        <div className="cta-row">
+          <a className={phase === 'open' ? 'ghost' : 'cta'} href={CONFIG.opensea} target="_blank" rel="noopener noreferrer">
+            {phase === 'open' ? 'View on OpenSea' : 'Buy on OpenSea'} <span aria-hidden>↗</span>
+          </a>
+        </div>
+      )}
 
       {!wallet && <Connect line="Mint up to 5 per wallet for free. You only pay gas." />}
       {wallet && (
         <div className="wallet">
           <WalletHead wallet={wallet} />
           {phase !== 'open' ? (
-            <p className="empty">{phase === 'soldout' ? 'Sold out. Every Jellypion is fully revealed.' : phase === 'soon' ? 'The mint has not opened yet. Mint up to 5 for free when it does.' : 'The mint is closed.'}</p>
+            <p className="empty">{phase === 'soldout' ? `Sold out. Every Jellypion is fully revealed${CONFIG.opensea ? '; they trade on OpenSea now' : ''}.` : phase === 'soon' ? 'The mint has not opened yet. Mint up to 5 for free when it does.' : 'The mint is closed.'}</p>
           ) : room === 0 ? (
             <p className="empty">
               This wallet has minted its {MAX_PER_WALLET}.{' '}

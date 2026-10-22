@@ -43,6 +43,11 @@ export function Docs() {
           <a className="d-hide-md" href="#contracts">
             Contracts
           </a>
+          {CONFIG.opensea && (
+            <a className="d-hide-sm" href={CONFIG.opensea} target="_blank" rel="noopener noreferrer">
+              OpenSea
+            </a>
+          )}
           <a href={`https://x.com/${X}`} target="_blank" rel="noopener noreferrer" title={`@${X} on X`}>
             𝕏<span className="d-hide-sm"> @{X}</span>
           </a>
@@ -419,6 +424,15 @@ function Content() {
           <li>
             <b>Mint:</b> free, at most 5 per wallet. You pay only the network gas; the contract refuses any ETH sent with a mint.
           </li>
+          {CONFIG.opensea && (
+            <li>
+              <b>Trade:</b> the collection is on{' '}
+              <a href={CONFIG.opensea} target="_blank" rel="noopener noreferrer">
+                OpenSea
+              </a>
+              . A staked Jellypion cannot be listed or sold until it is unstaked.
+            </li>
+          )}
           <li>
             <b>Fair instant hatch:</b> each egg's traits come from the hash of the block <i>after</i> your mint, which nobody can know when you
             mint. Eggs hatch strictly in order, so cancelling, retrying or waiting changes nothing. Hatching takes about a second.
